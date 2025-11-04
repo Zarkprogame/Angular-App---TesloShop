@@ -1,9 +1,49 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '@auth/services/auth.service';
 
 @Component({
   selector: 'register-page',
-  imports: [RouterLink],
+  imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './register-page.html',
 })
-export class RegisterPage { }
+export class RegisterPage {
+  fb = inject(FormBuilder);
+  router = inject(Router);
+
+  hasError = signal(false);
+
+  authService = inject(AuthService);
+
+  registerForm = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    fullname:  ['', [Validators.required, Validators.minLength(6)]],
+  });
+
+  onSubmit() {
+    if ( this.registerForm.invalid ){
+      this.hasError.set(true);
+      setTimeout(() => {
+        this.hasError.set(false);
+      }, 2000);
+      return;
+    }
+
+    const { email = '', password = '', fullname='' } = this.registerForm.value;
+
+    this.authService.register(email!, password!, fullname!)
+    .subscribe(isRegistered => {
+      if (isRegistered){
+        this.router.navigateByUrl('/auth/login');
+        return;
+      }
+
+      this.hasError.set(true);
+      setTimeout(() => {
+        this.hasError.set(false);
+      }, 2000);
+    })
+  }
+}
