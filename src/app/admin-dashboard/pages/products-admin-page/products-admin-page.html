@@ -1,0 +1,16 @@
+<h1 class="text-2xl font-bold">Listado de Productos</h1>
+
+<h3 class="text-lg">Total de Productos:
+  <span class="text-accent">10</span>
+</h3>
+
+<div class="divider"></div>
+
+<div class="flex gap-2 items-center h-20">
+  <app-pagination
+  [pages]="productsResource.value()?.pages ?? 0"
+  [currentPage]="paginationService.currentPage()"
+/>
+</div>
+
+<products-table [products]="productsResource.value()?.products ?? []"/>
