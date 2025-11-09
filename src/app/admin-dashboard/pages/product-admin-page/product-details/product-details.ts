@@ -80,10 +80,18 @@ export class ProductDetails implements OnInit{
           .map((tag) => tag.trim()) ?? [],
     };
 
-    this.productService.updateProduct(this.product().id, productLike).subscribe(
-      porduct => {
-        console.log('producto actualiado')
-      }
-    )
+    if (this.product().id == 'new'){
+      this.productService.createProduct(productLike).subscribe(
+        product => {
+          console.log('producto Creado')
+          this.router.navigate(['admin/products', product.id])
+        });
+    } else {
+      this.productService.updateProduct(this.product().id, productLike).subscribe(
+        porduct => {
+          console.log('producto actualiado')
+        });
+    }
+
   }
 }
