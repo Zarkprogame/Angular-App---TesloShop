@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ProductCarousel } from '@products/components/product-carousel/product-carousel';
 import { Product } from '@products/interfaces/product.interface';
 import { ProductService } from '@products/services/products.service';
+import { firstValueFrom } from 'rxjs';
 import { FormErrorLabel } from 'src/app/shared/components/form-error-label/form-error-label';
 import { FormUtils } from 'src/app/utils/form-utils';
 
@@ -64,7 +65,7 @@ export class ProductDetails implements OnInit{
     this.productForm.patchValue({ sizes: currentSizes });
   }
 
-  onSubmit() {
+  async onSubmit() {
     const isValid = this.productForm.valid;
     this.productForm.markAllAsTouched();
 
@@ -81,17 +82,22 @@ export class ProductDetails implements OnInit{
     };
 
     if (this.product().id == 'new'){
-      this.productService.createProduct(productLike).subscribe(
-        product => {
-          console.log('producto Creado')
-          this.router.navigate(['admin/products', product.id])
-        });
-    } else {
-      this.productService.updateProduct(this.product().id, productLike).subscribe(
-        porduct => {
-          console.log('producto actualiado')
-        });
-    }
+      const product = await firstValueFrom(
+        this.productService.createProduct(productLike)
+      );
 
+      console.log('producto Creado');
+
+      this.router.navigate(['admin/products', product.id])
+
+    } else {
+      await firstValueFrom(
+        this.productService.updateProduct(this.product().id, productLike)
+      );
+    }
+    this.wasSaved.set(true);
+    setTimeout(() => {
+      this.wasSaved.set(false);
+    }, 3000);
   }
 }
